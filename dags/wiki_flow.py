@@ -4,8 +4,7 @@ from airflow.operators.python import PythonOperator
 import os
 import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from pipelines.wiki_pipeline import get_wiki_page
-
+from pipelines.wiki_pipeline import extract_wiki_data, transform_wikipedia_data
 dag = DAG(
     dag_id='wiki_flow',
     default_args={
@@ -21,10 +20,17 @@ dag = DAG(
 
 extraction_data_from_wiki = PythonOperator(
     task_id="extract_data_from_wiki",
-    python_callable=get_wiki_page,
+    python_callable=extract_wiki_data,
     provide_context=True,
     op_kwargs={
         "url": "https://en.wikipedia.org/wiki/List_of_association_football_stadiums_by_capacity"},
     dag=dag
 
+)
+
+transform_wiki_data = PythonOperator(
+    task_id='transform_wiki_data',
+    provide_context=True,
+    python_callable=transform_wikipedia_data,
+    dag=dag
 )
