@@ -4,7 +4,7 @@ from airflow.operators.python import PythonOperator
 import os
 import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from pipelines.wiki_pipeline import extract_wiki_data, transform_wikipedia_data
+from pipelines.wiki_pipeline import extract_wiki_data, transform_wikipedia_data, write_wiki_data
 dag = DAG(
     dag_id='wiki_flow',
     default_args={
@@ -34,3 +34,13 @@ transform_wiki_data = PythonOperator(
     python_callable=transform_wikipedia_data,
     dag=dag
 )
+
+write_wiki_data = PythonOperator(
+    task_id='write_wiki_data',
+    provide_context=True,
+    python_callable=write_wiki_data,
+    dag=dag
+
+)
+
+extraction_data_from_wiki >> transform_wiki_data >> write_wiki_data
